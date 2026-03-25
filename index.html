@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maintenance Pro V4 - Gestione Manutenzioni</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2563eb">
+</head>
+<body>
+  <!-- Login Page -->
+  <div id="login-page" class="page active">
+    <div class="login-container">
+      <div class="login-logo">
+        <i class="fas fa-cogs"></i>
+        <h1>Maintenance Pro</h1>
+        <p>Gestione Manutenzioni Industriale V4</p>
+      </div>
+      <form id="login-form" class="login-form">
+        <div class="form-group">
+          <label><i class="fas fa-envelope"></i> Email</label>
+          <input type="email" id="login-email" required placeholder="Inserisci la tua email">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-lock"></i> Password</label>
+          <div class="password-wrapper">
+            <input type="password" id="login-password" required placeholder="Inserisci la password">
+            <button type="button" class="toggle-password" onclick="togglePassword()">
+              <i class="fas fa-eye" id="eye-icon"></i>
+            </button>
+          </div>
+        </div>
+        <div class="form-options">
+          <label class="checkbox-label">
+            <input type="checkbox" id="remember-me">
+            <span>Ricordami</span>
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary btn-login">
+          <i class="fas fa-sign-in-alt"></i> Accedi
+        </button>
+      </form>
+      <div class="login-footer">
+        <p>© 2024 Maintenance Pro V4</p>
+        <p class="hint">Credenziali default: admin@maintenance.pro / admin</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="app" class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <i class="fas fa-cogs"></i>
+        <span>Maintenance Pro</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" onclick="showPage('dashboard')">
+          <i class="fas fa-tachometer-alt"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showPage('alerts')">
+          <i class="fas fa-bell"></i>
+          <span>Allarmi</span>
+          <span class="badge" id="alert-badge">0</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showPage('machines')">
+          <i class="fas fa-industry"></i>
+          <span>Macchine</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showPage('maintenance')">
+          <i class="fas fa-tools"></i>
+          <span>Manutenzioni</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showPage('quick-entry')">
+          <i class="fas fa-plus-circle"></i>
+          <span>Intervento Rapido</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showPage('schedules')">
+          <i class="fas fa-calendar-alt"></i>
+          <span>Scadenze</span>
+        </a>
+        <a href="#" class="nav-item admin-only" onclick="showPage('users')">
+          <i class="fas fa-users"></i>
+          <span>Utenti</span>
+        </a>
+        <a href="#" class="nav-item admin-only" onclick="showPage('settings')">
+          <i class="fas fa-cog"></i>
+          <span>Impostazioni</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <span id="user-name">Utente</span>
+          <small id="user-role">Tecnico</small>
+        </div>
+        <button onclick="logout()" class="btn btn-icon">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <header class="top-bar">
+        <button class="menu-toggle" onclick="toggleSidebar()">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="top-bar-actions">
+          <button class="btn btn-icon" onclick="checkAlerts()" title="Verifica allarmi">
+            <i class="fas fa-bell"></i>
+            <span class="notification-dot" id="notification-dot"></span>
+          </button>
+          <button class="btn btn-icon" onclick="playTestSound()" title="Test suono">
+            <i class="fas fa-volume-up"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Dashboard Page -->
+      <div id="page-dashboard" class="page-content active">
+        <h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
+        
+        <!-- Alert Banner -->
+        <div id="alert-banner" class="alert-banner hidden">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span id="alert-message"></span>
+          <button onclick="showPage('alerts')">Vedi dettagli</button>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon bg-blue">
+              <i class="fas fa-industry"></i>
+            </div>
+            <div class="stat-info">
+              <h3 id="stat-machines">0</h3>
+              <p>Macchine Totali</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon bg-green">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-info">
+              <h3 id="stat-ok">0</h3>
+              <p>Macchine OK</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon bg-yellow">
+              <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <div class="stat-info">
+              <h3 id="stat-warning">0</h3>
+              <p>Da Testare</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon bg-red">
+              <i class="fas fa-times-circle"></i>
+            </div>
+            <div class="stat-info">
+              <h3 id="stat-error">0</h3>
+              <p>Non Funzionanti</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon bg-purple">
+              <i class="fas fa-tools"></i>
+            </div>
+            <div class="stat-info">
+              <h3 id="stat-maintenance">0</h3>
+              <p>Manutenzioni 30gg</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon bg-orange">
+              <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-info">
+              <h3 id="stat-hours">0</h3>
+              <p>Ore Lavorate</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alerts Section -->
+        <div class="dashboard-section">
+          <h2><i class="fas fa-bell"></i> Allarmi Scadenze</h2>
+          <div id="dashboard-alerts" class="alerts-list">
+            <p class="empty-state">Nessun allarme attivo</p>
+          </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="dashboard-section">
+          <h2><i class="fas fa-chart-pie"></i> Statistiche</h2>
+          <div class="charts-grid">
+            <div class="chart-card">
+              <h3>Stato Macchine</h3>
+              <canvas id="machines-chart"></canvas>
+            </div>
+            <div class="chart-card">
+              <h3>Manutenzioni per Tipo</h3>
+              <canvas id="maintenance-type-chart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Maintenance -->
+        <div class="dashboard-section">
+          <h2><i class="fas fa-history"></i> Ultime Manutenzioni</h2>
+          <div class="table-responsive">
+            <table class="data-table" id="recent-maintenance-table">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Macchina</th>
+                  <th>Tipo</th>
+                  <th>Tecnico</th>
+                  <th>Ore</th>
+                  <th>Azioni</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alerts Page -->
+      <div id="page-alerts" class="page-content">
+        <h1><i class="fas fa-bell"></i> Centro Allarmi</h1>
+        
+        <div class="filters">
+          <button class="btn btn-filter active" onclick="filterAlerts('all')">Tutti</button>
+          <button class="btn btn-filter" onclick="filterAlerts('urgent')">Urgenti</button>
+          <button class="btn btn-filter" onclick="filterAlerts('high')">Alta Priorità</button>
+          <button class="btn btn-filter" onclick="filterAlerts('medium')">Media</button>
+        </div>
+
+        <div id="alerts-list" class="alerts-grid">
+          <p class="empty-state">Caricamento allarmi...</p>
+        </div>
+      </div>
+
+      <!-- Machines Page -->
+      <div id="page-machines" class="page-content">
+        <div class="page-header">
+          <h1><i class="fas fa-industry"></i> Macchine</h1>
+          <button class="btn btn-primary admin-only" onclick="openMachineModal()">
+            <i class="fas fa-plus"></i> Nuova Macchina
+          </button>
+        </div>
+
+        <div class="filters-bar">
+          <div class="filter-group">
+            <input type="text" id="machine-search" placeholder="Cerca macchina..." onkeyup="filterMachines()">
+          </div>
+          <div class="filter-group">
+            <select id="filter-plant" onchange="filterMachines()">
+              <option value="">Tutti gli stabilimenti</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <select id="filter-status" onchange="filterMachines()">
+              <option value="">Tutti gli stati</option>
+              <option value="OK">OK</option>
+              <option value="DA_TESTARE">Da Testare</option>
+              <option value="NON_FUNZIONANTE">Non Funzionante</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table" id="machines-table">
+            <thead>
+              <tr>
+                <th>Codice</th>
+                <th>Nome</th>
+                <th>Categoria</th>
+                <th>Stabilimento</th>
+                <th>Stato</th>
+                <th>Ultima Man.</th>
+                <th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Maintenance Page -->
+      <div id="page-maintenance" class="page-content">
+        <div class="page-header">
+          <h1><i class="fas fa-tools"></i> Registro Manutenzioni</h1>
+          <div class="header-actions">
+            <button class="btn btn-secondary" onclick="exportMaintenance()">
+              <i class="fas fa-download"></i> Esporta
+            </button>
+            <button class="btn btn-primary" onclick="openMaintenanceModal()">
+              <i class="fas fa-plus"></i> Nuova Manutenzione
+            </button>
+          </div>
+        </div>
+
+        <div class="filters-bar">
+          <div class="filter-group">
+            <input type="date" id="filter-date-from" placeholder="Da">
+          </div>
+          <div class="filter-group">
+            <input type="date" id="filter-date-to" placeholder="A">
+          </div>
+          <div class="filter-group">
+            <select id="filter-type">
+              <option value="">Tutti i tipi</option>
+              <option value="ordinary">Ordinaria</option>
+              <option value="scheduled">Programmata</option>
+              <option value="emergency">Emergenza</option>
+            </select>
+          </div>
+          <button class="btn btn-secondary" onclick="filterMaintenance()">
+            <i class="fas fa-filter"></i> Filtra
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table" id="maintenance-table">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Macchina</th>
+                <th>Tipo</th>
+                <th>Tecnico</th>
+                <th>Ore</th>
+                <th>Descrizione</th>
+                <th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Quick Entry Page -->
+      <div id="page-quick-entry" class="page-content">
+        <h1><i class="fas fa-plus-circle"></i> Intervento Rapido</h1>
+        
+        <div class="quick-entry-form">
+          <form id="quick-maintenance-form" onsubmit="saveQuickMaintenance(event)">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Macchina *</label>
+                <select id="quick-machine" required>
+                  <option value="">Seleziona macchina</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Tipo Intervento *</label>
+                <select id="quick-type" required>
+                  <option value="ordinary">Ordinaria</option>
+                  <option value="scheduled">Programmata</option>
+                  <option value="emergency">Emergenza</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Data *</label>
+                <input type="date" id="quick-date" required>
+              </div>
+              <div class="form-group">
+                <label>Tecnico</label>
+                <select id="quick-technician">
+                  <option value="">Seleziona tecnico</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row time-row">
+              <div class="form-group">
+                <label>Ora Inizio *</label>
+                <input type="time" id="quick-start-time" required onchange="calculateHours()">
+              </div>
+              <div class="form-group">
+                <label>Ora Fine *</label>
+                <input type="time" id="quick-end-time" required onchange="calculateHours()">
+              </div>
+              <div class="form-group hours-display">
+                <label>Ore Totali</label>
+                <span id="quick-hours">0.00</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Descrizione Lavori *</label>
+              <textarea id="quick-description" rows="4" required placeholder="Descrivi i lavori eseguiti..."></textarea>
+              <button type="button" class="btn btn-icon voice-btn" onclick="startVoiceInput('quick-description')">
+                <i class="fas fa-microphone"></i>
+              </button>
+            </div>
+
+            <div class="form-group">
+              <label>Ricambi Utilizzati</label>
+              <textarea id="quick-parts" rows="2" placeholder="Codice ricambio - Descrizione - Quantità"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Note</label>
+              <textarea id="quick-notes" rows="2"></textarea>
+            </div>
+
+            <!-- Photo Upload -->
+            <div class="form-group photo-upload">
+              <label>Foto</label>
+              <div class="photo-buttons">
+                <button type="button" class="btn btn-secondary" onclick="openCamera()">
+                  <i class="fas fa-camera"></i> Scatta Foto
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('photo-input').click()">
+                  <i class="fas fa-upload"></i> Carica Foto
+                </button>
+                <input type="file" id="photo-input" accept="image/*" multiple style="display:none" onchange="handlePhotoSelect(event)">
+              </div>
+              <div id="photo-preview" class="photo-preview"></div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-save"></i> Salva Intervento
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="resetQuickForm()">
+                <i class="fas fa-undo"></i> Reset
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Schedules Page -->
+      <div id="page-schedules" class="page-content">
+        <h1><i class="fas fa-calendar-alt"></i> Scadenze Manutenzioni</h1>
+        
+        <div class="filters-bar">
+          <button class="btn btn-filter active" onclick="filterSchedules('all')">Tutte</button>
+          <button class="btn btn-filter" onclick="filterSchedules('overdue')">Scadute</button>
+          <button class="btn btn-filter" onclick="filterSchedules('upcoming')">In Arrivo</button>
+        </div>
+
+        <div id="schedules-list" class="schedules-grid">
+          <p class="empty-state">Caricamento scadenze...</p>
+        </div>
+      </div>
+
+      <!-- Users Page -->
+      <div id="page-users" class="page-content">
+        <div class="page-header">
+          <h1><i class="fas fa-users"></i> Gestione Utenti</h1>
+          <button class="btn btn-primary" onclick="openUserModal()">
+            <i class="fas fa-plus"></i> Nuovo Utente
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table" id="users-table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Ruolo</th>
+                <th>Stabilimento</th>
+                <th>Stato</th>
+                <th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Settings Page -->
+      <div id="page-settings" class="page-content">
+        <h1><i class="fas fa-cog"></i> Impostazioni</h1>
+        
+        <div class="settings-section">
+          <h2><i class="fas fa-envelope"></i> Configurazione Email</h2>
+          <form id="email-settings-form" onsubmit="saveEmailSettings(event)">
+            <div class="form-row">
+              <div class="form-group">
+                <label>SMTP Host</label>
+                <input type="text" id="smtp-host" placeholder="smtp.gmail.com">
+              </div>
+              <div class="form-group">
+                <label>SMTP Port</label>
+                <input type="number" id="smtp-port" value="587">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>SMTP Username</label>
+                <input type="text" id="smtp-user" placeholder="email@gmail.com">
+              </div>
+              <div class="form-group">
+                <label>SMTP Password</label>
+                <input type="password" id="smtp-pass" placeholder="Password">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Email Mittente</label>
+              <input type="email" id="smtp-from" placeholder="noreply@maintenance.pro">
+            </div>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save"></i> Salva Impostazioni
+            </button>
+          </form>
+        </div>
+
+        <div class="settings-section">
+          <h2><i class="fas fa-volume-up"></i> Impostazioni Notifiche Sonore</h2>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="sound-enabled" checked>
+              <span>Abilita suoni di notifica</span>
+            </label>
+          </div>
+          <div class="form-group">
+            <label>Volume</label>
+            <input type="range" id="sound-volume" min="0" max="100" value="80">
+          </div>
+          <button class="btn btn-secondary" onclick="playTestSound()">
+            <i class="fas fa-play"></i> Test Suono
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modals -->
+  
+  <!-- Machine Modal -->
+  <div id="machine-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="machine-modal-title">Nuova Macchina</h2>
+        <button class="btn btn-icon" onclick="closeModal('machine-modal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="machine-form" onsubmit="saveMachine(event)">
+        <input type="hidden" id="machine-id">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Codice *</label>
+            <input type="text" id="machine-code" required>
+          </div>
+          <div class="form-group">
+            <label>Nome *</label>
+            <input type="text" id="machine-name" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Categoria</label>
+            <select id="machine-category"></select>
+          </div>
+          <div class="form-group">
+            <label>Stabilimento</label>
+            <select id="machine-plant"></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Reparto</label>
+            <select id="machine-department"></select>
+          </div>
+          <div class="form-group">
+            <label>Numero Seriale</label>
+            <input type="text" id="machine-serial">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Produttore</label>
+            <input type="text" id="machine-manufacturer">
+          </div>
+          <div class="form-group">
+            <label>Modello</label>
+            <input type="text" id="machine-model">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Anno</label>
+            <input type="number" id="machine-year">
+          </div>
+          <div class="form-group">
+            <label>Stato</label>
+            <select id="machine-status">
+              <option value="OK">OK</option>
+              <option value="DA_TESTARE">Da Testare</option>
+              <option value="NON_FUNZIONANTE">Non Funzionante</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Posizione</label>
+          <input type="text" id="machine-location">
+        </div>
+        <div class="form-group">
+          <label>Note</label>
+          <textarea id="machine-notes" rows="3"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('machine-modal')">Annulla</button>
+          <button type="submit" class="btn btn-primary">Salva</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Maintenance Modal -->
+  <div id="maintenance-modal" class="modal">
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h2 id="maintenance-modal-title">Nuova Manutenzione</h2>
+        <button class="btn btn-icon" onclick="closeModal('maintenance-modal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="maintenance-form" onsubmit="saveMaintenance(event)">
+        <input type="hidden" id="maintenance-id">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Macchina *</label>
+            <select id="maintenance-machine" required></select>
+          </div>
+          <div class="form-group">
+            <label>Tipo *</label>
+            <select id="maintenance-type" required>
+              <option value="ordinary">Ordinaria</option>
+              <option value="scheduled">Programmata</option>
+              <option value="emergency">Emergenza</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Data Esecuzione *</label>
+            <input type="date" id="maintenance-date" required>
+          </div>
+          <div class="form-group">
+            <label>Tecnico</label>
+            <select id="maintenance-technician"></select>
+          </div>
+        </div>
+        <div class="form-row time-row">
+          <div class="form-group">
+            <label>Ora Inizio</label>
+            <input type="time" id="maintenance-start-time" onchange="calculateMaintenanceHours()">
+          </div>
+          <div class="form-group">
+            <label>Ora Fine</label>
+            <input type="time" id="maintenance-end-time" onchange="calculateMaintenanceHours()">
+          </div>
+          <div class="form-group hours-display">
+            <label>Ore Totali</label>
+            <span id="maintenance-hours">0.00</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Descrizione Lavori *</label>
+          <textarea id="maintenance-description" rows="4" required></textarea>
+        </div>
+        <div class="form-group">
+          <label>Ricambi Utilizzati</label>
+          <textarea id="maintenance-parts" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Note</label>
+          <textarea id="maintenance-notes" rows="2"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('maintenance-modal')">Annulla</button>
+          <button type="submit" class="btn btn-primary">Salva</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- User Modal -->
+  <div id="user-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="user-modal-title">Nuovo Utente</h2>
+        <button class="btn btn-icon" onclick="closeModal('user-modal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="user-form" onsubmit="saveUser(event)">
+        <input type="hidden" id="user-id">
+        <div class="form-group">
+          <label>Nome *</label>
+          <input type="text" id="user-name-input" required>
+        </div>
+        <div class="form-group">
+          <label>Email *</label>
+          <input type="email" id="user-email" required>
+        </div>
+        <div class="form-group" id="password-group">
+          <label>Password *</label>
+          <input type="password" id="user-password" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Ruolo</label>
+            <select id="user-role">
+              <option value="technician">Tecnico</option>
+              <option value="manager">Manager</option>
+              <option value="admin">Amministratore</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Stabilimento</label>
+            <select id="user-plant"></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Telefono</label>
+          <input type="tel" id="user-phone">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('user-modal')">Annulla</button>
+          <button type="submit" class="btn btn-primary">Salva</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Camera Modal -->
+  <div id="camera-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Scatta Foto</h2>
+        <button class="btn btn-icon" onclick="closeCamera()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="camera-container">
+        <video id="camera-video" autoplay playsinline></video>
+        <canvas id="camera-canvas" style="display:none"></canvas>
+        <div class="camera-controls">
+          <button type="button" class="btn btn-primary btn-lg" onclick="takePhoto()">
+            <i class="fas fa-camera"></i> Scatta
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Maintenance Modal -->
+  <div id="view-maintenance-modal" class="modal">
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h2>Dettaglio Manutenzione</h2>
+        <button class="btn btn-icon" onclick="closeModal('view-maintenance-modal')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div id="view-maintenance-content" class="view-content">
+        <!-- Populated by JS -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('view-maintenance-modal')">Chiudi</button>
+        <button type="button" class="btn btn-primary" onclick="sendReportByEmail()">
+          <i class="fas fa-envelope"></i> Invia Report
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div id="toast-container"></div>
+
+  <!-- Audio Elements for Alerts -->
+  <audio id="sound-urgent" preload="auto">
+    <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZURE" type="audio/wav">
+  </audio>
+  <audio id="sound-warning" preload="auto">
+    <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZURE" type="audio/wav">
+  </audio>
+  <audio id="sound-success" preload="auto">
+    <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZURE" type="audio/wav">
+  </audio>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

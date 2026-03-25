@@ -1,0 +1,39 @@
+{
+  "name": "Maintenance Pro V4",
+  "short_name": "MaintenancePro",
+  "description": "Gestione Manutenzioni Industriale - Allarmi, Foto, Notifiche",
+  "version": "4.0.0",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect fill='%232563eb' width='192' height='192' rx='32'/%3E%3Ctext x='96' y='130' font-size='100' text-anchor='middle'%3E🔧%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect fill='%232563eb' width='512' height='512' rx='64'/%3E%3Ctext x='256' y='340' font-size='280' text-anchor='middle'%3E🔧%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Nuovo Intervento",
+      "short_name": "Intervento",
+      "description": "Registra un nuovo intervento rapido",
+      "url": "/?page=quick-entry"
+    },
+    {
+      "name": "Allarmi",
+      "short_name": "Allarmi",
+      "description": "Visualizza allarmi scadenze",
+      "url": "/?page=alerts"
+    }
+  ]
+}
