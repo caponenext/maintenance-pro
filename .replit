@@ -1,0 +1,24 @@
+# Maintenance Pro V4 - Replit Configuration
+# Gestione Manutenzioni Industriale con Allarmi, Foto, Notifiche
+
+run = "node server.js"
+language = "nodejs"
+
+[env]
+NODE_ENV = "production"
+PORT = "3000"
+
+[nix]
+channel = "stable-22_11"
+
+[deployment]
+run = ["sh", "-c", "node server.js"]
+deploymentTarget = "cloudrun"
+
+# Secrets richiesti (da configurare in Replit):
+# JWT_SECRET = chiave segreta per JWT
+# SMTP_HOST = smtp.gmail.com (o altro provider)
+# SMTP_PORT = 587
+# SMTP_USER = tua-email@gmail.com
+# SMTP_PASS = password-app
+# SMTP_FROM = noreply@tua-azienda.com
